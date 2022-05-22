@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Road
+  - Object
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - Player
+  - Road
+  - Wall
+  - Object
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Back
+    uniqueID: 2337472135
+    locked: 0
+  - name: StageBack
+    uniqueID: 1635300209
+    locked: 0
+  - name: RoadBack
+    uniqueID: 3522225829
+    locked: 0
+  - name: Road
+    uniqueID: 502766845
+    locked: 0
+  - name: Object
+    uniqueID: 93938417
+    locked: 0
+  - name: Player
+    uniqueID: 2534958887
+    locked: 0
+  - name: PlayerFront
+    uniqueID: 2687630605
+    locked: 0
+  - name: RoadFront
+    uniqueID: 884330399
+    locked: 0
