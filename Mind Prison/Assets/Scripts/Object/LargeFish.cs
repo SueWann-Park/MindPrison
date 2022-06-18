@@ -38,7 +38,7 @@ public class LargeFish : MonoBehaviour
     private void SetRandomValues()
     {
         moveX = Random.Range(0.005f, 0.015f);
-        moveY[0] = Random.Range(0.5f, 1f);
+        moveY[0] = Random.Range(0.1f, 0.5f);
         moveY[1] = Random.Range(0.5f, 2f);
         startY = transform.position.y;
     }
