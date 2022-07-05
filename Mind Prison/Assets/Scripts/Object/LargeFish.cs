@@ -4,32 +4,32 @@ using UnityEngine;
 
 public class LargeFish : MonoBehaviour
 {
-    public int halfX = 20;
-
+    public int halfX = 28;
+    public bool isLeft = false;
     // Start is called before the first frame update
     void Start()
     {
         StartCoroutine(UpdatePosition());
     }
 
-    float moveX;
-    float[] moveY;
+    float coffX;
+    float coffY1;
+    float coffY2;
     float startY;
     IEnumerator UpdatePosition()
     {
-        moveY = new float[2];
         SetRandomValues();
 
         for (; ;)
         {
-            transform.position = new Vector3(transform.position.x + moveX, moveY[0] * Mathf.Sin(moveY[1] * Time.time), 0);
+            transform.position = new Vector3(transform.position.x + coffX * (isLeft ? -1 : 1), startY + coffY1 * Mathf.Sin(coffY1 * Time.time), 0);
 
             yield return new WaitForFixedUpdate();
 
             float x = Camera.main.transform.position.x;
-            if (transform.position.x > x + halfX)
+            if (Mathf.Abs(transform.position.x - x) > halfX)
             {
-                transform.position = new Vector3(x - halfX, Random.Range(-8, 8f), 0);
+                transform.position = new Vector3(x - halfX * (isLeft ? -1 : 1), Random.Range(-8, 8f), 0);
                 SetRandomValues();
             }
         }
@@ -37,15 +37,9 @@ public class LargeFish : MonoBehaviour
 
     private void SetRandomValues()
     {
-        moveX = Random.Range(0.005f, 0.015f);
-        moveY[0] = Random.Range(0.1f, 0.5f);
-        moveY[1] = Random.Range(0.5f, 2f);
-        startY = transform.position.y;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        coffX = Random.Range(0.005f, 0.015f) * 30;
+        coffY1 = Random.Range(0.1f, 0.5f);
+        coffY2 = Random.Range(0.5f, 2f);
+        startY = Random.Range(-5, 5f);
     }
 }
