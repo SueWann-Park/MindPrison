@@ -6,6 +6,8 @@ public class LargeFish : MonoBehaviour
 {
     public int halfX = 28;
     public bool isLeft = false;
+    public float xVel = 1;
+    public float _startY = 0;
     // Start is called before the first frame update
     void Start()
     {
@@ -37,9 +39,9 @@ public class LargeFish : MonoBehaviour
 
     private void SetRandomValues()
     {
-        coffX = Random.Range(0.005f, 0.015f) * 30;
+        coffX = Random.Range(0.005f, 0.015f) * xVel;
         coffY1 = Random.Range(0.1f, 0.5f);
         coffY2 = Random.Range(0.5f, 2f);
-        startY = Random.Range(-5, 5f);
+        startY = _startY + Random.Range(-1, 1f);
     }
 }

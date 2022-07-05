@@ -6,8 +6,8 @@ public class PlayerMain : MonoBehaviour
 {
     private Rigidbody2D rb2d;
     private Animator animator;
-    private float xAxis;
-    private bool isJumped;
+    public float xAxis;
+    public bool isJumped;
     private bool isGrounded;
     private bool isGroundedPrev;
     private Transform groundCheck;
@@ -25,13 +25,6 @@ public class PlayerMain : MonoBehaviour
         isJumped = false;
         isGrounded = false;
         isGroundedPrev = false;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        ActionMove();
-        ActionJump();
     }
 
     private void FixedUpdate()
@@ -85,9 +78,10 @@ public class PlayerMain : MonoBehaviour
         transform.localScale = new Vector3(xAxis > 0 ? 1 : -1, 1, 1);
     }
 
-    void ActionMove()
+
+    public void ActionMove(float _xAxis)
     {
-        xAxis = Input.GetAxis("Horizontal");
+        xAxis = Mathf.Clamp(_xAxis, -1f, 1f);
         if (Mathf.Abs(xAxis) < 0.1f)
         {
             xAxis = 0;
@@ -100,11 +94,8 @@ public class PlayerMain : MonoBehaviour
         }
     }
 
-    void ActionJump()
+    public void ActionJump()
     {
-        if (Input.GetButtonDown("Jump") == false)
-            return;
-
         if (isJumped == true)
             return;
 
