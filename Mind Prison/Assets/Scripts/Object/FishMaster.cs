@@ -45,6 +45,7 @@ public class FishMaster : MonoBehaviour
         group.transform.localScale = new Vector3(dir == 1 ? -1 : 1, 1, 1);
         group.transform.position = new Vector2(x, y);
 
+        float groupY = group.transform.position.y;
         List<Coroutine> fishMoves = new List<Coroutine>();
         for(int i = 0; i < numFishes; i++)
         {
@@ -54,6 +55,9 @@ public class FishMaster : MonoBehaviour
             fish.transform.parent = group.transform;
             fish.transform.localPosition = new Vector2(Random.Range(-2f, 2f), Random.Range(-1f, 1f));
             fish.transform.localScale = Vector3.one;
+
+            float coff = 0.65f + groupY * 0.4f / 16;
+            fish.GetComponent<SpriteRenderer>().color = new Color(coff, coff, coff);
 
             fishMoves.Add(StartCoroutine(TwiggleFish(fish.transform)));
         }

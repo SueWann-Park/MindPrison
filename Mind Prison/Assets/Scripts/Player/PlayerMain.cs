@@ -63,7 +63,7 @@ public class PlayerMain : MonoBehaviour
 
     private void SetVelocity()
     {
-        float x = Mathf.Clamp(xAxis * moveCoff, -5, 5);
+        float x = Mathf.Clamp(xAxis * moveCoff, -4 * 0.6f, 4 * 0.6f);
         float y = Mathf.Clamp(rb2d.velocity.y, -10, 10);
 
         rb2d.velocity = new Vector2(x, y);
@@ -76,6 +76,11 @@ public class PlayerMain : MonoBehaviour
             return;
 
         transform.localScale = new Vector3(xAxis > 0 ? 1 : -1, 1, 1);
+
+        for(int i = 3; i < 6; i++)
+        {
+            transform.GetChild(i).GetChild(0).localScale = new Vector3(transform.localScale.x, 1, 1);
+        }
     }
 
 

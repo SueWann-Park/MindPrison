@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class GameMaster : MonoBehaviour
 {
@@ -15,6 +16,9 @@ public class GameMaster : MonoBehaviour
     private float lastTouchTime = 0;
     public static bool isJumping;
 
+    public AudioSource opening;
+    public AudioSource closing;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -25,6 +29,21 @@ public class GameMaster : MonoBehaviour
             boxes[i] = pm.transform.GetChild(i+3);
             boxes[i].gameObject.SetActive(false);
         }
+
+        texts = Shuffle<string>(texts);
+    }
+    public static List<T> Shuffle<T>(List<T> list)
+    {
+        int n = list.Count;
+        while (n > 0)
+        {
+            n--;
+            int k = Random.Range(0,list.Count);
+            T value = list[k];
+            list[k] = list[n];
+            list[n] = value;
+        }
+        return list;
     }
 
     private IEnumerator PlayerEnter()
@@ -32,6 +51,7 @@ public class GameMaster : MonoBehaviour
         psr.sortingLayerName = "Road";
         playerSpriteTransform.localScale = new Vector3(0.9f, 0.9f, 1);
         doorAnimator.SetBool("IsOpen", true);
+        opening.Play();
 
         yield return new WaitForSeconds(0.3f);
         StartCoroutine(PlayerUpDown());
@@ -39,7 +59,38 @@ public class GameMaster : MonoBehaviour
 
         psr.sortingLayerName = "Player";
         doorAnimator.SetBool("IsOpen", false);
+        closing.Play();
+
         gameState = 1;
+    }
+
+    public Animator playerAnimator;
+    private IEnumerator PlayerExit()
+    {
+        doorAnimator.SetBool("IsOpen", true);
+        opening.Play();
+
+        yield return new WaitForSeconds(0.3f);
+
+        psr.sortingLayerName = "Road";
+
+        playerAnimator.SetBool("IsBack", true);
+        StartCoroutine(PlayerUpDown());
+        yield return StartCoroutine(PlayerScaleDown());
+
+        doorAnimator.SetBool("IsOpen", false);
+        closing.Play();
+
+        gameState = 0;
+
+        yield return new WaitForSeconds(0.5f);
+        playerAnimator.SetBool("IsBack", false);
+
+        textIndex = 0;
+        texts = Shuffle<string>(texts);
+        goToHomeRoutine = null;
+        firstMessageRoutine = null;
+        lastRoutine = null;
     }
     
     private IEnumerator PlayerUpDown()
@@ -60,11 +111,31 @@ public class GameMaster : MonoBehaviour
             playerSpriteTransform.localScale = new Vector3(0.9f + i / 1000.0f, 0.9f + i / 1000.0f, 1);
             yield return new WaitForFixedUpdate();
         }
+        playerSpriteTransform.localScale = new Vector3(1f, 1f, 1);
     }
 
-    private float xDest;
+    private IEnumerator PlayerScaleDown()
+    {
+        for (int i = 0; i < 100; i++)
+        {
+            playerSpriteTransform.localScale = new Vector3(1f - i / 1000.0f, 1f - i / 1000.0f, 1);
+            yield return new WaitForFixedUpdate();
+        }
+        playerSpriteTransform.localScale = new Vector3(0.9f,0.9f,1);
+    }
+    private IEnumerator LastMessages()
+    {
+        yield return StartCoroutine(ShowText("거기... 아무도 없어?"));
+        yield return StartCoroutine(ShowText("..."));
+        yield return StartCoroutine(ShowText("안녕..."));
+
+        gameState = 4;
+    }
+
+    private float xDest, yDest;
     Coroutine lastRoutine = null;
     Coroutine firstMessageRoutine = null;
+    Coroutine goToHomeRoutine = null;
     // Update is called once per frame
     void Update()
     {
@@ -73,6 +144,11 @@ public class GameMaster : MonoBehaviour
         {
             touchCount++;
             lastTouchTime = Time.time;
+        }
+        else if(Time.time > lastTouchTime + 40f && goToHomeRoutine == null && gameState == 2)
+        {
+            goToHomeRoutine =  StartCoroutine(LastMessages());
+            gameState = 3;
         }
         else if(Time.time > lastTouchTime + 0.3f)
         {
@@ -96,6 +172,7 @@ public class GameMaster : MonoBehaviour
                 firstMessageRoutine = StartCoroutine(FirstMessages());
             }
             touchCount = 0;
+            lastTouchTime = Time.time;
         }
         else if(gameState == 2)
         {
@@ -108,6 +185,16 @@ public class GameMaster : MonoBehaviour
             if(isTouched == true)
             {
                 xDest = Camera.main.ScreenToWorldPoint(Input.mousePosition).x;
+                yDest = Camera.main.ScreenToWorldPoint(Input.mousePosition).y;
+
+                float xDiff = Mathf.Abs(xDest - pm.transform.position.x);
+                float yDiff = yDest - pm.transform.position.y;
+
+                if(xDiff < 0.5f && yDiff < 2.2f) // player Touch
+                {
+                    gameState = 9;
+                    StartCoroutine(PlayerTalk());
+                }
             }
             if(pm.isJumped == false)
             {
@@ -117,6 +204,28 @@ public class GameMaster : MonoBehaviour
             {
                 xDest = pm.transform.position.x;
             }
+        }
+        else if(gameState == 4)
+        {
+            pm.ActionMove(-pm.transform.position.x);
+            if(Mathf.Abs(pm.transform.position.x) < 0.1f)
+            {
+                gameState = 5;
+                StartCoroutine(PlayerExit());
+            }
+        }
+    }
+
+    int textIndex = 0;
+    private IEnumerator PlayerTalk()
+    {
+        yield return StartCoroutine(ShowText(texts[textIndex++]));
+
+        gameState = 2;
+        if(textIndex >= texts.Count)
+        {
+            goToHomeRoutine = StartCoroutine(LastMessages());
+            gameState = 3;
         }
     }
 
@@ -140,11 +249,14 @@ public class GameMaster : MonoBehaviour
         yield return StartCoroutine(ShowText("오늘도 그대로야"));
         yield return StartCoroutine(ShowText("내가 평생 이 바다에서 나가지 못한다면 어떡하지...?"));
 
+        xDest = pm.transform.position.x;
         gameState = 2;
     }
 
     private IEnumerator ShowText(string s)
     {
+        pm.ActionMove(0);
+        xDest = pm.transform.position.x;
         int count = 0;
         for(int i = 0; i < s.Length; i++)
         {
@@ -173,7 +285,7 @@ public class GameMaster : MonoBehaviour
         yield return StartCoroutine(FadeIn(sr));
         
         yield return PrintCharByChar(t, s);
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(1.5f);
         t.text = "";
         yield return StartCoroutine(FadeOut(sr));
 
@@ -186,7 +298,7 @@ public class GameMaster : MonoBehaviour
         for(int i = 0; i < s.Length; i++)
         {
             t.text += s[i];
-            yield return new WaitForSeconds(0.35f);
+            yield return new WaitForSeconds(0.15f);
         }
     }
 
